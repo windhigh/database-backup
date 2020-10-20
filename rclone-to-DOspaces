@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Author: Akash Mehta   Website: http://akash.windhigh.com
+# Rclone Backups to Digital Ocean Spaces
+# Digital ocean space: "skovian-backups"
+# Rclone remote: "skovian-do-backups"
+# To check logs: #grep "BackupToSpaces" /var/log/syslog         and     #tail /root/skovian-backups/local-backup-log.txt
+# To copy from remote to local #rclone copy --verbose skovian-do-backups:skovian-backups/source-path-to-copy /root/skovian-backups/
+
+CURRENTDATETIME=$(date +%d-%h-%Y_%H-%M);
+LOGFILE='/root/skovian-backups/local-backup-log.txt'
+
+echo "###################" >> $LOGFILE
+echo "BackupToSpaces started at $(date +'%d-%m-%Y %H:%M:%S')" >> $LOGFILE
+
+echo "Now performing backup ..."
+
+time rclone sync "/" "skovian-do-backups:skovian-backups/${HOSTNAME}/files/$(date +%d-%h-%Y)" \
+    --delete-excluded \
+    --skip-links \
+    --stats 60s \
+    --stats-log-level NOTICE \
+    --transfers=32 \
+    --checkers=128 \
+    --retries 1 \
+    --include "/var/www/**" \
+#    --include "/root/skovian-backups/**" \
+#    --include "/etc/nginx/sites-available/" \
+#    --include "/etc/nginx/sites-available/**" \
+#    --retries 1
+#    --no-check-dest
+#    --no-traverse
+#    --dry-run \
+#    -v
+
+echo "BackupToSpaces finished at $(date +'%d-%m-%Y %H:%M:%S')" >> $LOGFILE
+echo "... performing backup done!"
